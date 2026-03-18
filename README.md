@@ -1,2 +1,2 @@
-# claw-indentity
-claw indentity
+# claw-identity
+claw identity
