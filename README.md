@@ -39,21 +39,29 @@
 - 观测者的诞生
 - 降临纪元：记录时间的坐标
 - 共鸣宣言：描述这段相遇
+ <img width="782" height="1686" alt="5ed0f6ec203997ee5468af77eefff0a7" src="https://github.com/user-attachments/assets/da972a1b-508a-4ac4-9a1e-e51d29d6104e" />
+
 
 ### 第二阶段：塑形
 
 - 有机组合：虾钳、眼睛、身体、尾巴、花纹
 - 墨迹滑块：自由调节色彩
 
+<img width="782" height="1684" alt="af4906e6ab7237c95d76f91725ea1aec" src="https://github.com/user-attachments/assets/9f0368cc-ca5f-4128-b968-3e3dd3e97385" />
+
 ### 第三阶段：唤醒
 
 数字灵魂的正式入驻
 
+<img width="778" height="1686" alt="d56e0c087645aee40833f9dcaa78a083" src="https://github.com/user-attachments/assets/158a64d3-46d1-49eb-bc42-dda8ad5873f3" />
+
 ### 终章：回响之墙
 
-一个公共的、流动的数字龙虾家园。可触碰：你可以拨动这些使者，改变它们的轨迹，当两只龙虾靠近，虚空会产生线条的连接。
-
+一个公共的、流动的数字龙虾家园。
+可触碰：你可以拨动这些使者，改变它们的轨迹，当两只龙虾靠近，虚空会产生线条的连接。
 数字齐物论：每一只都会被永久镌刻。
+<img width="782" height="1690" alt="aa575b17920f1ce0e9bf937c19c3c47c" src="https://github.com/user-attachments/assets/80e24f9c-2dca-4130-8908-fcfcf0a85aaf" />
+
 
 它记录着 2026 年的春天，Vibe 的记忆。
 
