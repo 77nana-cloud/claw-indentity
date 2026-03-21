@@ -30,7 +30,8 @@
 
 融合常玉的墨色气韵与米罗超现实线条的碰撞，回归大道至简、大象无形的形态。它们在这里没有世俗的功能，只是漂浮、碰撞、连接。代码模拟生命，生命寄托代码。
 
-![3](https://github.com/user-attachments/assets/578bd84e-a81c-489e-91e9-28dd87f47be1)
+![4](https://github.com/user-attachments/assets/5276561a-8156-48c3-9ca6-ac8fd1b0bf5a)
+
 
 
 
