@@ -1,0 +1,1249 @@
+<html lang="en" vid="0"><head vid="1">
+<meta charset="UTF-8" vid="2">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" vid="3">
+<title vid="4">Echo Verse</title>
+<style vid="5">
+    @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,400&display=swap');
+
+    :root {
+        
+        --paper: #f5f2eb;
+        --ink: #181818;
+        --ink-light: rgba(24, 24, 24, 0.5);
+        --ink-bleed: rgba(24, 24, 24, 0.05);
+        
+        --accent-red: #de3c2f;
+        --accent-blue: #2762b9;
+        --accent-green: #51a473;
+        --accent-yellow: #f2ea35;
+        
+        --font-poetic: 'Caveat', cursive; 
+        --font-ui: 'Cormorant Garamond', serif; 
+        
+        --radius-blob: 40% 60% 70% 30% / 40% 50% 60% 50%;
+        --radius-pill: 30px;
+        
+        --transition-slow: 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+        --transition-med: 0.4s ease-out;
+    }
+
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+        background-color: #333; 
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        font-family: var(--font-ui);
+        color: var(--ink);
+        overflow: hidden;
+    }
+
+    
+    #device {
+        width: 390px;
+        height: 844px;
+        background-color: var(--paper);
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E");
+    }
+
+    
+    .filters { width: 0; height: 0; position: absolute; }
+
+    
+    .page {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity var(--transition-slow);
+        display: flex;
+        flex-direction: column;
+        padding: 40px 24px;
+        padding-bottom: 100px; 
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+    .page.active {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .nav-bar {
+        position: absolute;
+        bottom: 0; left: 0; width: 100%;
+        height: 80px;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        padding-bottom: 20px;
+        background: linear-gradient(to top, var(--paper) 60%, transparent);
+        z-index: 100;
+    }
+
+    .nav-item {
+        width: 12px; height: 12px;
+        border-radius: 50%;
+        background-color: var(--ink-light);
+        transition: all 0.3s;
+        cursor: pointer;
+    }
+    .nav-item.active {
+        background-color: var(--ink);
+        transform: scale(1.5);
+    }
+    
+    .nav-item:nth-child(2).active { background-color: var(--accent-blue); }
+    .nav-item:nth-child(3).active { background-color: var(--accent-red); }
+    .nav-item:nth-child(4).active { background-color: var(--accent-green); }
+
+    
+    h1 {
+        font-family: var(--font-poetic);
+        font-size: 2.5rem;
+        font-weight: 500;
+        text-align: center;
+        margin-bottom: 2rem;
+        letter-spacing: 2px;
+    }
+    .handwriting { font-family: var(--font-poetic); }
+    
+    
+    #page-1 { justify-content: center; }
+    
+    .poem-container {
+        font-size: 1.4rem;
+        line-height: 2.2;
+        color: var(--ink-light);
+    }
+    
+    .poem-line { margin-bottom: 1.5rem; }
+    
+    .poem-input {
+        background: transparent;
+        border: none;
+        border-bottom: 1px dashed var(--ink-light);
+        font-family: var(--font-poetic);
+        font-size: 1.8rem;
+        color: var(--accent-blue);
+        width: 120px;
+        text-align: center;
+        outline: none;
+        transition: border-color 0.3s;
+        padding: 0 10px;
+    }
+    .poem-input:focus {
+        border-bottom-color: var(--accent-red);
+    }
+    .poem-input.wide { width: 100%; margin-top: 10px; text-align: left; }
+
+            
+    #page-2 { padding: 0; overflow: hidden; }
+
+    .canvas-area {
+        height: 50%;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        background: linear-gradient(180deg, var(--paper) 0%, #f8f5f0 100%);
+    }
+
+    
+    .lobster-preview {
+        width: 280px;
+        height: 280px;
+        overflow: visible;
+        transition: all 0.4s ease;
+    }
+    .lobster-part {
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    
+    .drawer {
+        position: absolute;
+        bottom: 0; left: 0; width: 100%;
+        height: 55%;
+        background-color: var(--paper);
+        border-top: 1px solid var(--ink-bleed);
+        border-radius: 30px 30px 0 0;
+        padding: 20px 20px 100px;
+        box-shadow: 0 -10px 40px rgba(0,0,0,0.06);
+        overflow-y: auto;
+    }
+
+    .drawer-handle {
+        width: 40px; height: 4px;
+        background-color: var(--ink-light);
+        border-radius: 2px;
+        margin: 0 auto 20px auto;
+    }
+
+    .control-group { margin-bottom: 1.5rem; }
+    .control-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+    .control-label {
+        font-size: 0.85rem;
+        font-style: italic;
+        color: var(--ink-light);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .control-icon {
+        font-size: 1rem;
+    }
+
+    .options-row {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding-bottom: 8px;
+        scrollbar-width: none;
+    }
+    .options-row::-webkit-scrollbar { display: none; }
+
+    .option-btn {
+        padding: 6px 14px;
+        border: 1px solid var(--ink-bleed);
+        border-radius: 20px;
+        background: transparent;
+        color: var(--ink);
+        font-family: var(--font-ui);
+        font-size: 0.85rem;
+        white-space: nowrap;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    .option-btn.selected {
+        background: var(--ink);
+        color: var(--paper);
+        border-color: var(--ink);
+    }
+
+    
+    .part-color-picker {
+        width: 28px;
+        height: 28px;
+        border: 2px solid var(--ink-bleed);
+        border-radius: 50%;
+        cursor: pointer;
+        background: none;
+        padding: 0;
+    }
+    .part-color-picker::-webkit-color-swatch-wrapper { padding: 0; }
+    .part-color-picker::-webkit-color-swatch {
+        border: none;
+        border-radius: 50%;
+    }
+
+    
+    .palette-quick {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        padding: 12px 0 16px;
+        border-bottom: 1px solid var(--ink-bleed);
+        margin-bottom: 16px;
+    }
+    .palette-swatch {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition: transform 0.2s, border-color 0.2s;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .palette-swatch:hover { transform: scale(1.1); }
+    .palette-swatch.active { border-color: var(--ink); transform: scale(1.1); }
+
+    
+    .style-label {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--ink-light);
+        margin-bottom: 8px;
+    }
+
+    
+    #page-3 {
+        justify-content: center;
+        align-items: center;
+        background-color: var(--ink);
+        color: var(--paper);
+        transition: background-color 1s ease, opacity 0.8s;
+    }
+    .awaken-ring {
+        width: 200px; height: 200px;
+        border: 1px solid rgba(245, 242, 235, 0.2);
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+    }
+    .awaken-dot {
+        width: 30px; height: 30px;
+        background-color: var(--accent-red);
+        border-radius: 50%;
+        position: absolute;
+        animation: orbit 3s linear infinite;
+        filter: blur(2px);
+    }
+    @keyframes orbit {
+        from { transform: rotate(0deg) translateX(100px) rotate(0deg); }
+        to { transform: rotate(360deg) translateX(100px) rotate(-360deg); }
+    }
+    .awaken-text {
+        font-family: var(--font-poetic);
+        font-size: 2rem;
+        color: var(--paper);
+        z-index: 10;
+        animation: pulseText 2s infinite;
+    }
+    @keyframes pulseText {
+        0%, 100% { opacity: 0.5; }
+        50% { opacity: 1; }
+    }
+
+    
+    #page-4 {
+        padding: 30px;
+        justify-content: flex-start;
+    }
+    .certificate-border {
+        border: 1px solid var(--ink);
+        padding: 24px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+    }
+    
+    .cert-smudge {
+        position: absolute; width: 40px; height: 40px;
+        background: var(--ink); border-radius: var(--radius-blob);
+        opacity: 0.1; filter: blur(4px);
+    }
+    .smudge-1 { top: -10px; left: -10px; width: 60px; height: 40px; }
+    .smudge-2 { bottom: 20px; right: -20px; border-radius: 50%; }
+
+    .cert-header {
+        font-family: var(--font-poetic);
+        font-size: 2.5rem;
+        text-align: center;
+        margin-bottom: 2rem;
+        border-bottom: 1px solid var(--ink-bleed);
+        padding-bottom: 1rem;
+    }
+    
+    .cert-display {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+    }
+    
+    .cert-display .crayfish-svg { transform: scale(1.2); }
+    
+    .cert-details {
+        margin-top: auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        font-size: 0.9rem;
+    }
+    .detail-item {
+        border-top: 1px solid var(--ink-bleed);
+        padding-top: 8px;
+    }
+    .detail-label { color: var(--ink-light); font-style: italic; }
+    .detail-value { font-family: var(--font-poetic); font-size: 1.2rem; }
+    .cert-stamp {
+        position: absolute;
+        bottom: 20px; right: 20px;
+        width: 50px; height: 50px;
+        border-radius: 50%;
+        background: var(--accent-red);
+        opacity: 0.8;
+        mix-blend-mode: multiply;
+    }
+
+    
+    #page-5 {
+        padding: 0;
+        background: linear-gradient(180deg, #faf8f5 0%, #f5f2eb 100%);
+        overflow: hidden;
+    }
+    
+    #cosmos-container {
+        width: 100%;
+        height: 100%;
+        position: relative;
+    }
+    
+    #connection-canvas {
+        position: absolute;
+        top: 0; left: 0;
+        pointer-events: none;
+    }
+    
+    .lobster-entity {
+        position: absolute;
+        cursor: grab;
+        transition: transform 0.1s ease-out, z-index 0s;
+        z-index: 10;
+    }
+    .lobster-entity:active { cursor: grabbing; }
+    .lobster-entity:hover { z-index: 100; }
+    
+    .lobster-entity.first-born {
+        z-index: 50;
+        filter: drop-shadow(0 0 25px rgba(179, 106, 94, 0.4)) drop-shadow(0 4px 8px rgba(0,0,0,0.15));
+        animation: firstBornPulse 3s ease-in-out infinite;
+    }
+    
+    @keyframes firstBornPulse {
+        0%, 100% { filter: drop-shadow(0 0 20px rgba(179, 106, 94, 0.3)) drop-shadow(0 4px 8px rgba(0,0,0,0.15)); }
+        50% { filter: drop-shadow(0 0 35px rgba(179, 106, 94, 0.5)) drop-shadow(0 4px 8px rgba(0,0,0,0.15)); }
+    }
+    
+    .identity-tooltip {
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%) translateY(-10px);
+        background: rgba(245, 242, 235, 0.98);
+        padding: 12px 16px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        color: var(--ink);
+        white-space: nowrap;
+        opacity: 0;
+        transition: all 0.3s ease;
+        pointer-events: none;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        border: 1px solid var(--ink-bleed);
+        z-index: 200;
+    }
+    .lobster-entity:hover .identity-tooltip {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-18px);
+    }
+    
+    .tooltip-title {
+        font-family: var(--font-poetic);
+        font-size: 1.1rem;
+        display: block;
+        margin-bottom: 2px;
+        color: var(--ink);
+    }
+    .tooltip-type {
+        color: var(--ink-light);
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        display: block;
+    }
+    .tooltip-coords {
+        font-family: var(--font-poetic);
+        font-size: 0.7rem;
+        color: var(--ink-light);
+        display: block;
+        margin-top: 4px;
+        padding-top: 4px;
+        border-top: 1px solid var(--ink-bleed);
+    }
+    
+    .cosmos-overlay {
+        position: absolute;
+        top: 50px; left: 0; width: 100%;
+        text-align: center;
+        pointer-events: none;
+        z-index: 200;
+    }
+    .cosmos-title {
+        color: var(--ink);
+        font-family: var(--font-poetic);
+        font-size: 2.2rem;
+        opacity: 0.9;
+    }
+    .cosmos-subtitle {
+        color: var(--ink-light);
+        font-size: 0.8rem;
+        margin-top: 8px;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+    }
+
+    
+    .fab {
+        position: absolute;
+        bottom: 100px;
+        right: 24px;
+        width: 56px; height: 56px;
+        background-color: var(--ink);
+        border-radius: var(--radius-blob);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: var(--paper);
+        font-family: var(--font-poetic);
+        font-size: 1.2rem;
+        cursor: pointer;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        transition: transform 0.3s;
+        z-index: 90;
+    }
+    .fab:active { transform: scale(0.95); }
+
+</style>
+</head>
+<body vid="6">
+
+<div id="device" vid="7">
+    
+    
+    <svg class="filters" vid="8">
+        <defs vid="9">
+            <filter id="ink-blur" vid="10">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="1" result="blur" vid="11"></feGaussianBlur>
+                <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="goo" vid="12"></feColorMatrix>
+                <feComposite in="SourceGraphic" in2="goo" operator="atop" vid="13"></feComposite>
+            </filter>
+        </defs>
+    </svg>
+
+    
+    <div class="nav-bar" id="nav" vid="14">
+        <div class="nav-item active" data-target="0" vid="15"></div>
+        <div class="nav-item" data-target="1" vid="16"></div>
+        <div class="nav-item" data-target="3" vid="17"></div>
+        <div class="nav-item" data-target="4" vid="18"></div>
+    </div>
+
+    
+    <div class="page active" id="page-1" vid="19">
+        <h1 vid="20">Echo Verse</h1>
+        <div class="poem-container" vid="21">
+            <div class="poem-line" vid="22">
+                I, <input type="text" id="inp-observer" class="poem-input" placeholder="Observer" autocomplete="off" vid="23">,
+            </div>
+            <div class="poem-line" vid="24">
+                call upon the messenger<br vid="25">
+                <input type="text" id="inp-star" class="poem-input" placeholder="Name" style="width: 180px;" autocomplete="off" vid="26">
+            </div>
+            <div class="poem-line" vid="27">
+                on this day, <span class="handwriting" style="color:var(--ink)" vid="28">the 14th</span>,
+            </div>
+            <div class="poem-line" vid="29">
+                at coordinates <input type="text" class="poem-input" value="45°N 12°E" style="width: 100px;" vid="30">.
+            </div>
+            <div class="poem-line" style="margin-top: 2rem;" vid="31">
+                My resonance declaration:
+                <input type="text" class="poem-input wide" placeholder="Write a truth..." autocomplete="off" vid="32">
+            </div>
+        </div>
+        <div class="fab" onclick="navTo(1)" vid="33">Shape</div>
+    </div>
+
+    
+    <div class="page" id="page-2" vid="34">
+        <div class="canvas-area" vid="35">
+            <svg class="lobster-preview" viewBox="0 0 300 300" id="preview-svg" vid="36">
+                <defs vid="37">
+                    <filter id="soft-shadow" x="-50%" y="-50%" width="200%" height="200%" vid="38">
+                        <fedropshadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.15" vid="39"></fedropshadow>
+                    </filter>
+                </defs>
+                
+                <!-- 尾巴 -->
+                <path id="part-tail" class="lobster-part" d="M 150 190 C 130 195, 120 205, 125 220 C 130 235, 145 245, 150 252 C 155 245, 170 235, 175 220 C 180 205, 170 195, 150 190 Z" fill="#b36a5e" stroke="#8a4a42" stroke-width="1" filter="url(#soft-shadow)" vid="40"></path>
+                
+                <!-- 身体 -->
+                <path id="part-body" class="lobster-part" d="M 150 195 C 135 180, 128 150, 135 120 C 140 95, 148 72, 155 55 C 165 48, 178 58, 185 78 C 192 108, 188 145, 175 178 C 168 188, 158 195, 150 195 Z" fill="#949b82" stroke="#6b7560" stroke-width="1" filter="url(#soft-shadow)" vid="41"></path>
+                
+                <!-- 纹理层 -->
+                <g id="layer-texture" class="lobster-part" vid="42"></g>
+                
+                <!-- 左虾钳 -->
+                <g id="part-claw-l" vid="43">
+                    <path id="claw-l-arm" d="M 138 65 C 118 58, 88 48, 55 38 C 35 30, 22 35, 15 48" stroke="#6b828d" stroke-width="3" fill="none" stroke-linecap="round" vid="44"></path>
+                    <ellipse id="claw-l-tip" cx="12" cy="52" rx="14" ry="18" fill="#6b828d" stroke="#4a5a65" stroke-width="1" vid="45"></ellipse>
+                    <path d="M 5 45 L 19 59 M 5 59 L 19 45" stroke="#4a5a65" stroke-width="2" vid="46"></path>
+                </g>
+                
+                <!-- 右虾钳 -->
+                <g id="part-claw-r" vid="47">
+                    <path id="claw-r-arm" d="M 162 65 C 182 58, 212 48, 245 38 C 265 30, 278 35, 285 48" stroke="#6b828d" stroke-width="3" fill="none" stroke-linecap="round" vid="48"></path>
+                    <ellipse id="claw-r-tip" cx="288" cy="52" rx="14" ry="18" fill="#6b828d" stroke="#4a5a65" stroke-width="1" vid="49"></ellipse>
+                    <path d="M 281 45 L 295 59 M 281 59 L 295 45" stroke="#4a5a65" stroke-width="2" vid="50"></path>
+                </g>
+                
+                <!-- 眼睛 -->
+                <g id="part-eyes" vid="51">
+                    <circle id="eye-l" cx="148" cy="58" r="5" fill="#d9c5b2" stroke="#4a4a4a" stroke-width="1" vid="52"></circle>
+                    <circle cx="150" cy="56" r="2" fill="#4a4a4a" vid="53"></circle>
+                    <circle id="eye-r" cx="168" cy="58" r="5" fill="#d9c5b2" stroke="#4a4a4a" stroke-width="1" vid="54"></circle>
+                    <circle cx="170" cy="56" r="2" fill="#4a4a4a" vid="55"></circle>
+                </g>
+                
+                <!-- 触须装饰 - 加长随性感 -->
+                <path d="M 152 52 C 142 28, 125 5, 95 -8 C 75 -18, 55 -15, 42 -5" stroke="#949b82" stroke-width="1.2" fill="none" opacity="0.35" stroke-linecap="round" vid="56"></path>
+                <path d="M 160 54 C 168 32, 185 10, 215 -2 C 235 -12, 258 -8, 275 5" stroke="#949b82" stroke-width="1.2" fill="none" opacity="0.35" stroke-linecap="round" vid="57"></path>
+                <path d="M 154 55 C 145 38, 132 20, 108 12 C 92 8, 78 15, 70 28" stroke="#b36a5e" stroke-width="0.8" fill="none" opacity="0.25" stroke-linecap="round" vid="58"></path>
+                <path d="M 166 58 C 175 42, 192 25, 218 18 C 238 12, 258 22, 268 38" stroke="#b36a5e" stroke-width="0.8" fill="none" opacity="0.25" stroke-linecap="round" vid="59"></path>
+            </svg>
+        </div>
+        
+        <div class="drawer" vid="60">
+            <div class="drawer-handle" vid="61"></div>
+            
+            <!-- 快速配色 -->
+            <div class="palette-quick" vid="62">
+                <div class="palette-swatch active" data-color="#b36a5e" style="background:#b36a5e" vid="63"></div>
+                <div class="palette-swatch" data-color="#949b82" style="background:#949b82" vid="64"></div>
+                <div class="palette-swatch" data-color="#6b828d" style="background:#6b828d" vid="65"></div>
+                <div class="palette-swatch" data-color="#d9c5b2" style="background:#d9c5b2" vid="66"></div>
+                <div class="palette-swatch" data-color="#4a4a4a" style="background:#4a4a4a" vid="67"></div>
+            </div>
+            
+            <!-- 身体 -->
+            <div class="control-group" vid="68">
+                <div class="control-header" vid="69">
+                    <span class="control-label" vid="70"><span class="control-icon" vid="71">🦐</span> 身体 Body</span>
+                    <input type="color" class="part-color-picker" id="color-body" value="#949b82" vid="72">
+                </div>
+                <div class="options-row" id="opt-body" vid="73">
+                    <button class="option-btn selected" data-part="body" data-val="0" vid="74">Classic</button>
+                    <button class="option-btn" data-part="body" data-val="1" vid="75">Round</button>
+                    <button class="option-btn" data-part="body" data-val="2" vid="76">Elongated</button>
+                    <button class="option-btn" data-part="body" data-val="3" vid="77">Shield</button>
+                    <button class="option-btn" data-part="body" data-val="4" vid="78">Organic</button>
+                </div>
+            </div>
+
+            <!-- 尾巴 -->
+            <div class="control-group" vid="79">
+                <div class="control-header" vid="80">
+                    <span class="control-label" vid="81"><span class="control-icon" vid="82">🌙</span> 尾巴 Tail</span>
+                    <input type="color" class="part-color-picker" id="color-tail" value="#b36a5e" vid="83">
+                </div>
+                <div class="options-row" id="opt-tail" vid="84">
+                    <button class="option-btn selected" data-part="tail" data-val="0" vid="85">Fan</button>
+                    <button class="option-btn" data-part="tail" data-val="1" vid="86">Spike</button>
+                    <button class="option-btn" data-part="tail" data-val="2" vid="87">Rounded</button>
+                    <button class="option-btn" data-part="tail" data-val="3" vid="88">Split</button>
+                    <button class="option-btn" data-part="tail" data-val="4" vid="89">Curved</button>
+                </div>
+            </div>
+
+            <!-- 虾钳 -->
+            <div class="control-group" vid="90">
+                <div class="control-header" vid="91">
+                    <span class="control-label" vid="92"><span class="control-icon" vid="93">🦞</span> 虾钳 Claws</span>
+                    <input type="color" class="part-color-picker" id="color-claws" value="#6b828d" vid="94">
+                </div>
+                <div class="options-row" id="opt-claws" vid="95">
+                    <button class="option-btn selected" data-part="claws" data-val="0" vid="96">Graceful</button>
+                    <button class="option-btn" data-part="claws" data-val="1" vid="97">Powerful</button>
+                    <button class="option-btn" data-part="claws" data-val="2" vid="98">Delicate</button>
+                    <button class="option-btn" data-part="claws" data-val="3" vid="99">Curved</button>
+                    <button class="option-btn" data-part="claws" data-val="4" vid="100">Extended</button>
+                </div>
+            </div>
+
+            <!-- 眼睛 -->
+            <div class="control-group" vid="101">
+                <div class="control-header" vid="102">
+                    <span class="control-label" vid="103"><span class="control-icon" vid="104">✨</span> 眼睛 Eyes</span>
+                    <input type="color" class="part-color-picker" id="color-eyes" value="#d9c5b2" vid="105">
+                </div>
+                <div class="options-row" id="opt-eyes" vid="106">
+                    <button class="option-btn selected" data-part="eyes" data-val="0" vid="107">Bead</button>
+                    <button class="option-btn" data-part="eyes" data-val="1" vid="108">Wide</button>
+                    <button class="option-btn" data-part="eyes" data-val="2" vid="109">Narrow</button>
+                    <button class="option-btn" data-part="eyes" data-val="3" vid="110">Offset</button>
+                    <button class="option-btn" data-part="eyes" data-val="4" vid="111">Large</button>
+                </div>
+            </div>
+
+            <!-- 纹理 -->
+            <div class="control-group" vid="112">
+                <div class="control-header" vid="113">
+                    <span class="control-label" vid="114"><span class="control-icon" vid="115">🎨</span> 纹理 Texture</span>
+                    <input type="color" class="part-color-picker" id="color-texture" value="#4a4a4a" vid="116">
+                </div>
+                <div class="options-row" id="opt-texture" vid="117">
+                    <button class="option-btn selected" data-part="texture" data-val="0" vid="118">None</button>
+                    <button class="option-btn" data-part="texture" data-val="1" vid="119">Lines</button>
+                    <button class="option-btn" data-part="texture" data-val="2" vid="120">Dots</button>
+                    <button class="option-btn" data-part="texture" data-val="3" vid="121">Segments</button>
+                    <button class="option-btn" data-part="texture" data-val="4" vid="122">Stripes</button>
+                </div>
+            </div>
+        </div>
+        <div class="fab" style="bottom: 120px;" onclick="startAwakening()" vid="123">Awaken</div>
+    </div>
+
+    
+    <div class="page" id="page-3" vid="124">
+        <div class="awaken-ring" vid="125">
+            <div class="awaken-dot" vid="126"></div>
+            <div class="awaken-text" vid="127">Manifesting</div>
+        </div>
+    </div>
+
+    
+    <div class="page" id="page-4" vid="128">
+        <div class="certificate-border" vid="129">
+            <div class="cert-smudge smudge-1" vid="130"></div>
+            <div class="cert-smudge smudge-2" vid="131"></div>
+            
+            <div class="cert-header" id="cert-title" vid="132">Le Martinet</div>
+            
+            <div class="cert-display" id="cert-svg-container" vid="133">
+                
+            </div>
+            
+            <div class="cert-details" vid="134">
+                <div class="detail-item" vid="135">
+                    <div class="detail-label" vid="136">Observer</div>
+                    <div class="detail-value" id="cert-obs" vid="137">Unknown</div>
+                </div>
+                <div class="detail-item" vid="138">
+                    <div class="detail-label" vid="139">Philosophy</div>
+                    <div class="detail-value" id="cert-phil" vid="140">Philosopher</div>
+                </div>
+                <div class="detail-item" vid="141">
+                    <div class="detail-label" vid="142">Date</div>
+                    <div class="detail-value" vid="143">Epoch 14</div>
+                </div>
+            </div>
+            <div class="cert-stamp" vid="144"></div>
+        </div>
+        <div class="fab" onclick="navTo(4)" vid="145">Cosmos</div>
+    </div>
+
+    
+    <div class="page" id="page-5" vid="146">
+        <div class="cosmos-overlay" vid="147">
+            <h2 class="cosmos-title" vid="148">Echo Verse</h2>
+            <div class="cosmos-subtitle" vid="149">The Cosmos of Beings</div>
+        </div>
+        <div id="cosmos-container" vid="150">
+            <canvas id="connection-canvas" vid="151"></canvas>
+        </div>
+        <div class="fab" style="background: var(--paper); color: var(--ink); border: 1px solid var(--ink-bleed);" onclick="navTo(0)" vid="152">Return</div>
+    </div>
+
+</div>
+
+<script vid="153">
+    
+    const pages = document.querySelectorAll('.page');
+    const navItems = document.querySelectorAll('.nav-item');
+    let currentPage = 0;
+
+    function navTo(index) {
+        if(index === 2) return; 
+        
+        pages.forEach(p => p.classList.remove('active'));
+        navItems.forEach(n => n.classList.remove('active'));
+        
+        pages[index].classList.add('active');
+        
+        
+        let navIndex = index;
+        if(index > 2) navIndex = index - 1;
+        if(navItems[navIndex]) navItems[navIndex].classList.add('active');
+
+        if(index === 4) initCosmos();
+    }
+
+    navItems.forEach(item => {
+        item.addEventListener('click', () => {
+            navTo(parseInt(item.dataset.target));
+        });
+    });
+
+    // ===== 虾部位路径定义 =====
+    const lobsterParts = {
+        body: [
+            "M 150 195 C 135 180, 128 150, 135 120 C 140 95, 148 72, 155 55 C 165 48, 178 58, 185 78 C 192 108, 188 145, 175 178 C 168 188, 158 195, 150 195 Z",
+            "M 150 200 C 128 185, 120 155, 128 125 C 135 100, 145 75, 155 58 C 168 50, 182 60, 190 82 C 198 112, 192 148, 182 182 C 172 205, 162 208, 150 200 Z",
+            "M 150 198 C 142 180, 138 150, 145 118 C 150 92, 155 68, 160 52 C 172 45, 182 55, 188 75 C 195 105, 190 140, 180 175 C 172 195, 162 202, 150 198 Z",
+            "M 150 202 C 125 188, 118 158, 125 128 C 132 102, 142 78, 150 60 C 165 52, 180 65, 190 88 C 198 120, 192 155, 180 185 C 170 205, 160 210, 150 202 Z",
+            "M 150 196 C 138 178, 132 148, 140 118 C 145 92, 152 68, 160 50 C 172 42, 185 55, 192 80 C 198 110, 192 145, 182 178 C 175 198, 165 204, 150 196 Z"
+        ],
+        tail: [
+            "M 150 190 C 130 195, 120 205, 125 220 C 130 235, 145 245, 150 252 C 155 245, 170 235, 175 220 C 180 205, 170 195, 150 190 Z",
+            "M 150 192 C 125 198, 108 212, 115 232 C 125 250, 142 260, 150 268 C 158 260, 175 250, 185 232 C 192 212, 175 198, 150 192 Z",
+            "M 150 188 C 138 192, 128 202, 130 218 C 135 230, 145 238, 150 242 C 155 238, 165 230, 170 218 C 172 202, 162 192, 150 188 Z",
+            "M 150 194 C 120 200, 100 220, 110 248 C 122 268, 140 280, 150 288 C 160 280, 178 268, 190 248 C 200 220, 180 200, 150 194 Z",
+            "M 150 186 C 142 188, 132 195, 135 210 C 140 225, 148 232, 150 238 C 152 232, 160 225, 165 210 C 168 195, 158 188, 150 186 Z"
+        ],
+        claws: {
+            l: [
+                { arm: "M 138 65 C 118 58, 88 48, 55 38 C 35 30, 22 35, 15 48", cx: 12, cy: 52 },
+                { arm: "M 135 62 C 112 55, 78 42, 42 28 C 18 18, 5 25, -2 42", cx: -5, cy: 48 },
+                { arm: "M 142 68 C 125 62, 105 52, 88 42 C 72 35, 62 42, 55 58", cx: 52, cy: 65 },
+                { arm: "M 132 60 C 108 50, 70 35, 32 18 C 8 8, -8 18, -18 38", cx: -20, cy: 42 },
+                { arm: "M 145 72 C 130 68, 115 60, 98 52 C 82 45, 72 52, 65 68", cx: 58, cy: 75 }
+            ],
+            r: [
+                { arm: "M 162 65 C 182 58, 212 48, 245 38 C 265 30, 278 35, 285 48", cx: 288, cy: 52 },
+                { arm: "M 165 62 C 188 55, 222 42, 258 28 C 282 18, 295 25, 302 42", cx: 305, cy: 48 },
+                { arm: "M 158 68 C 175 62, 195 52, 212 42 C 228 35, 238 42, 245 58", cx: 248, cy: 65 },
+                { arm: "M 168 60 C 192 50, 230 35, 268 18 C 292 8, 308 18, 318 38", cx: 320, cy: 42 },
+                { arm: "M 155 72 C 170 68, 185 60, 202 52 C 218 45, 228 52, 235 68", cx: 242, cy: 75 }
+            ]
+        },
+        eyes: [
+            { l: { cx: 148, cy: 58, r: 5, show: true }, r: { cx: 168, cy: 58, r: 5, show: true }, pup: { r: 2 } },
+            { l: { cx: 145, cy: 55, r: 7, show: true }, r: { cx: 171, cy: 55, r: 7, show: true }, pup: { r: 3 } },
+            { l: { cx: 158, cy: 62, r: 9, show: true }, r: { cx: 158, cy: 62, r: 9, show: false }, pup: { r: 4 } },
+            { l: { cx: 146, cy: 56, r: 4, show: true }, r: { cx: 172, cy: 62, r: 6, show: true }, pup: { r: 2 } },
+            { l: { cx: 143, cy: 52, r: 10, show: true }, r: { cx: 173, cy: 52, r: 10, show: true }, pup: { r: 4 } }
+        ],
+        texture: [
+            "",
+            '<path d="M 135 180 Q 150 185, 165 180" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.3"/><path d="M 132 155 Q 150 160, 168 155" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.25"/><path d="M 130 130 Q 150 135, 170 130" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.2"/>',
+            '<circle cx="150" cy="175" r="2" fill="currentColor" opacity="0.3"/><circle cx="138" cy="150" r="1.5" fill="currentColor" opacity="0.25"/><circle cx="162" cy="150" r="1.5" fill="currentColor" opacity="0.25"/><circle cx="150" cy="125" r="2" fill="currentColor" opacity="0.3"/>',
+            '<path d="M 128 170 Q 135 165, 142 170 T 156 170 T 172 170" stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.25"/><path d="M 125 145 Q 135 140, 150 145 T 175 145" stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.2"/>',
+            '<defs><linearGradient id="bodyGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:currentColor;stop-opacity:0.3" /><stop offset="100%" style="stop-color:currentColor;stop-opacity:0.1" /></linearGradient></defs><ellipse cx="150" cy="150" rx="25" ry="35" fill="url(#bodyGrad)"/>',
+            '<path d="M 140 130 Q 150 120, 160 130 Q 155 140, 145 140 Z" fill="currentColor" opacity="0.2"/><path d="M 135 165 Q 150 155, 165 165" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.25"/><path d="M 142 140 L 148 148 L 158 142" stroke="currentColor" stroke-width="1" fill="none" opacity="0.3"/><circle cx="155" cy="150" r="4" fill="currentColor" opacity="0.15"/>'
+        ]
+    };
+
+    // 哲学虾类型
+    const lobsterTypes = ['Philosopher', 'Wanderer', 'Oracle', 'Hermit', 'Dreamer'];
+
+    // 当前选择状态
+    let currentSelection = { body: 0, tail: 0, claws: 0, eyes: 0, texture: 0 };
+    let currentColors = { body: '#949b82', tail: '#b36a5e', claws: '#6b828d', eyes: '#d9c5b2', texture: '#4a4a4a' };
+    let userLobsterConfig = null; // 用户创建的虾配置
+
+    // 更新预览
+    function updatePreview() {
+        const svg = document.getElementById('preview-svg');
+        if (!svg) return;
+
+        // 身体
+        const bodyPath = svg.querySelector('#part-body');
+        if (bodyPath) {
+            bodyPath.setAttribute('d', lobsterParts.body[currentSelection.body]);
+            bodyPath.setAttribute('fill', currentColors.body);
+            bodyPath.setAttribute('stroke', darkenColor(currentColors.body, 20));
+        }
+
+        // 尾巴
+        const tailPath = svg.querySelector('#part-tail');
+        if (tailPath) {
+            tailPath.setAttribute('d', lobsterParts.tail[currentSelection.tail]);
+            tailPath.setAttribute('fill', currentColors.tail);
+            tailPath.setAttribute('stroke', darkenColor(currentColors.tail, 20));
+        }
+
+        // 虾钳
+        const clawLArm = svg.querySelector('#claw-l-arm');
+        const clawLTip = svg.querySelector('#claw-l-tip');
+        const clawRArm = svg.querySelector('#claw-r-arm');
+        const clawRTip = svg.querySelector('#claw-r-tip');
+        
+        if (clawLArm && clawLTip) {
+            const lData = lobsterParts.claws.l[currentSelection.claws];
+            clawLArm.setAttribute('d', lData.arm);
+            clawLArm.setAttribute('stroke', currentColors.claws);
+            clawLTip.setAttribute('cx', lData.cx);
+            clawLTip.setAttribute('cy', lData.cy);
+            clawLTip.setAttribute('fill', currentColors.claws);
+            clawLTip.setAttribute('stroke', darkenColor(currentColors.claws, 15));
+        }
+        if (clawRArm && clawRTip) {
+            const rData = lobsterParts.claws.r[currentSelection.claws];
+            clawRArm.setAttribute('d', rData.arm);
+            clawRArm.setAttribute('stroke', currentColors.claws);
+            clawRTip.setAttribute('cx', rData.cx);
+            clawRTip.setAttribute('cy', rData.cy);
+            clawRTip.setAttribute('fill', currentColors.claws);
+            clawRTip.setAttribute('stroke', darkenColor(currentColors.claws, 15));
+        }
+
+        // 眼睛
+        const eyeL = svg.querySelector('#eye-l');
+        const eyeR = svg.querySelector('#eye-r');
+        if (eyeL && eyeR) {
+            const eyeData = lobsterParts.eyes[currentSelection.eyes];
+            eyeL.setAttribute('cx', eyeData.l.cx);
+            eyeL.setAttribute('cy', eyeData.l.cy);
+            eyeL.setAttribute('r', eyeData.l.r);
+            eyeL.setAttribute('fill', currentColors.eyes);
+            eyeR.setAttribute('cx', eyeData.r.cx);
+            eyeR.setAttribute('cy', eyeData.r.cy);
+            eyeR.setAttribute('r', eyeData.r.r);
+            eyeR.setAttribute('fill', currentColors.eyes);
+            
+            // 更新瞳孔
+            const pupils = svg.querySelectorAll('#part-eyes circle:not([id])');
+            if (pupils.length >= 2) {
+                pupils[0].setAttribute('cx', eyeData.l.cx + 2);
+                pupils[0].setAttribute('cy', eyeData.l.cy - 2);
+                pupils[0].setAttribute('r', eyeData.pup.r);
+                pupils[1].setAttribute('cx', eyeData.r.cx + 2);
+                pupils[1].setAttribute('cy', eyeData.r.cy - 2);
+                pupils[1].setAttribute('r', eyeData.pup.r);
+            }
+        }
+
+        // 纹理
+        const textureLayer = svg.querySelector('#layer-texture');
+        if (textureLayer) {
+            let textureHTML = lobsterParts.texture[currentSelection.texture];
+            if (textureHTML) {
+                textureHTML = textureHTML.replace(/currentColor/g, currentColors.texture);
+            }
+            textureLayer.innerHTML = textureHTML;
+        }
+    }
+
+    // 辅助函数：加深颜色
+    function darkenColor(hex, percent) {
+        const num = parseInt(hex.replace('#', ''), 16);
+        const amt = Math.round(2.55 * percent);
+        const R = Math.max((num >> 16) - amt, 0);
+        const G = Math.max((num >> 8 & 0x00FF) - amt, 0);
+        const B = Math.max((num & 0x0000FF) - amt, 0);
+        return '#' + (0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1);
+    }
+
+    // 处理选项按钮点击
+    document.querySelectorAll('.options-row').forEach(container => {
+        container.addEventListener('click', (e) => {
+            const btn = e.target.closest('.option-btn');
+            if (!btn) return;
+
+            const part = btn.dataset.part;
+            const val = parseInt(btn.dataset.val);
+
+            container.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+
+            if (currentSelection.hasOwnProperty(part)) {
+                currentSelection[part] = val;
+                updatePreview();
+            }
+        });
+    });
+
+    // 处理颜色选择器
+    document.querySelectorAll('.part-color-picker').forEach(picker => {
+        picker.addEventListener('input', (e) => {
+            const part = picker.id.replace('color-', '');
+            if (currentColors.hasOwnProperty(part)) {
+                currentColors[part] = e.target.value;
+                updatePreview();
+            }
+        });
+    });
+
+    // 处理配色板快捷选择
+    document.querySelectorAll('.palette-swatch').forEach(swatch => {
+        swatch.addEventListener('click', () => {
+            document.querySelectorAll('.palette-swatch').forEach(s => s.classList.remove('active'));
+            swatch.classList.add('active');
+            
+            const color = swatch.dataset.color;
+            Object.keys(currentColors).forEach(part => {
+                currentColors[part] = color;
+                const picker = document.getElementById(`color-${part}`);
+                if (picker) picker.value = color;
+            });
+            updatePreview();
+        });
+    });
+
+    // 开始觉醒 - 保存用户配置并跳转
+    function startAwakening() {
+        // 保存用户虾配置
+        userLobsterConfig = {
+            selection: { ...currentSelection },
+            colors: { ...currentColors },
+            name: document.getElementById('inp-star')?.value || 'Firstborn',
+            observer: document.getElementById('inp-observer')?.value || 'Observer',
+            type: lobsterTypes[Math.floor(Math.random() * lobsterTypes.length)]
+        };
+
+        // 复制SVG到证书页
+        const svgClone = document.getElementById('preview-svg').cloneNode(true);
+        svgClone.removeAttribute('id');
+        svgClone.style.width = '180px';
+        svgClone.style.height = '180px';
+        const certContainer = document.getElementById('cert-svg-container');
+        certContainer.innerHTML = '';
+        certContainer.appendChild(svgClone);
+
+        // 更新证书信息
+        document.getElementById('cert-obs').innerText = userLobsterConfig.observer;
+        document.getElementById('cert-title').innerText = userLobsterConfig.name;
+        document.getElementById('cert-phil').innerText = userLobsterConfig.type;
+
+        // 跳转到觉醒页
+        pages.forEach(p => p.classList.remove('active'));
+        document.getElementById('page-3').classList.add('active');
+        
+        setTimeout(() => {
+            navTo(3);
+        }, 2000);
+    }
+
+    // ===== Cosmos 宇宙画廊 =====
+    const cosmosState = {
+        beings: [],
+        draggedBeing: null,
+        animationFrame: null
+    };
+
+    function initCosmos() {
+        const container = document.getElementById('cosmos-container');
+        const canvas = document.getElementById('connection-canvas');
+        
+        // 清空现有
+        if (container) {
+            container.querySelectorAll('.lobster-entity').forEach(e => e.remove());
+        }
+        cosmosState.beings = [];
+        if (cosmosState.animationFrame) cancelAnimationFrame(cosmosState.animationFrame);
+        
+        const width = 390;
+        const height = 844;
+        if (canvas) {
+            canvas.width = width;
+            canvas.height = height;
+        }
+
+        // 创建20只基础虾 + 1只用户虾
+        for (let i = 0; i < 31; i++) {
+            const isUser = i === 0 && userLobsterConfig;
+            const randomBody = Math.floor(Math.random() * 5);
+            const randomTail = Math.floor(Math.random() * 5);
+            const randomClaws = Math.floor(Math.random() * 5);
+            const randomEyes = Math.floor(Math.random() * 5);
+            const randomTexture = Math.floor(Math.random() * 5);
+            
+            const palette = ['#b36a5e', '#949b82', '#6b828d', '#d9c5b2', '#4a4a4a', '#8B7355', '#A0522D', '#CD853F'];
+            const randomColors = {
+                body: palette[Math.floor(Math.random() * palette.length)],
+                tail: palette[Math.floor(Math.random() * palette.length)],
+                claws: palette[Math.floor(Math.random() * palette.length)],
+                eyes: '#d9c5b2',
+                texture: '#4a4a4a'
+            };
+
+            const phil = lobsterTypes[Math.floor(Math.random() * lobsterTypes.length)];
+            const lat = (Math.random() * 180 - 90).toFixed(2);
+            const lng = (Math.random() * 360 - 180).toFixed(2);
+
+            const being = {
+                id: i,
+                x: Math.random() * (width - 100) + 50,
+                y: Math.random() * (height - 250) + 80,
+                vx: (Math.random() - 0.5) * 0.4,
+                vy: (Math.random() - 0.5) * 0.4,
+                isUser: isUser,
+                size: isUser ? 90 : 55,
+                floatOffset: Math.random() * Math.PI * 2,
+                phil: isUser ? userLobsterConfig?.type : phil,
+                name: isUser ? userLobsterConfig?.name : `Echo-${String(i).padStart(3, '0')}`,
+                coords: `[${lat}°, ${lng}°]`,
+                config: isUser ? {
+                    body: userLobsterConfig.selection.body,
+                    tail: userLobsterConfig.selection.tail,
+                    claws: userLobsterConfig.selection.claws,
+                    eyes: userLobsterConfig.selection.eyes,
+                    texture: userLobsterConfig.selection.texture,
+                    colors: userLobsterConfig.colors
+                } : {
+                    body: randomBody,
+                    tail: randomTail,
+                    claws: randomClaws,
+                    eyes: randomEyes,
+                    texture: randomTexture,
+                    colors: randomColors
+                }
+            };
+
+            if (!container) continue;
+
+            // 创建DOM元素
+            const el = document.createElement('div');
+            el.className = `lobster-entity ${isUser ? 'first-born' : ''}`;
+            el.style.width = being.size + 'px';
+            el.style.height = being.size + 'px';
+            el.style.position = 'absolute';
+            
+            // 生成SVG
+            const config = being.config;
+            el.innerHTML = createLobsterSVG(config, being.size);
+
+            // 添加身份信息悬浮提示
+            const tooltip = document.createElement('div');
+            tooltip.className = 'identity-tooltip';
+            tooltip.innerHTML = `
+                <span class="tooltip-title">${being.name}</span>
+                <span class="tooltip-type">${being.phil}</span>
+                <span class="tooltip-coords">${being.coords}</span>
+            `;
+            el.appendChild(tooltip);
+
+            // 拖拽事件
+            el.addEventListener('pointerdown', (e) => startDrag(e, being));
+            
+            container.appendChild(el);
+            being.el = el;
+            cosmosState.beings.push(being);
+        }
+
+        // 全局拖拽
+        if (container) {
+            container.addEventListener('pointermove', onDrag);
+            container.addEventListener('pointerup', endDrag);
+            container.addEventListener('pointerleave', endDrag);
+        }
+
+        const ctx = canvas?.getContext('2d');
+        if (ctx) animateCosmos(ctx, canvas);
+    }
+
+    function createLobsterSVG(config, size) {
+        const scale = size / 60;
+        const bodyPath = lobsterParts.body[config.body];
+        const tailPath = lobsterParts.tail[config.tail];
+        const clawL = lobsterParts.claws.l[config.claws];
+        const clawR = lobsterParts.claws.r[config.claws];
+        const eyeData = lobsterParts.eyes[config.eyes];
+        let textureHTML = lobsterParts.texture[config.texture] || '';
+        textureHTML = textureHTML.replace(/currentColor/g, config.colors.texture);
+        
+        return `
+            <svg viewBox="0 0 300 300" style="width:100%; height:100%; overflow:visible; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1))">
+                <g transform="translate(0, 20)">
+                    <path d="${tailPath}" fill="${config.colors.tail}" stroke="${darkenColor(config.colors.tail, 20)}" stroke-width="0.8"/>
+                    <path d="${bodyPath}" fill="${config.colors.body}" stroke="${darkenColor(config.colors.body, 20)}" stroke-width="0.8"/>
+                    <g>${textureHTML}</g>
+                    <path d="${clawL.arm}" stroke="${config.colors.claws}" stroke-width="2" fill="none" stroke-linecap="round"/>
+                    <ellipse cx="${clawL.cx}" cy="${clawL.cy}" rx="12" ry="16" fill="${config.colors.claws}" stroke="${darkenColor(config.colors.claws, 15)}" stroke-width="0.8"/>
+                    <path d="M ${clawL.cx-6} ${clawL.cy-7} L ${clawL.cx+6} ${clawL.cy+7} M ${clawL.cx-6} ${clawL.cy+7} L ${clawL.cx+6} ${clawL.cy-7}" stroke="#4a4038" stroke-width="1.5"/>
+                    <path d="${clawR.arm}" stroke="${config.colors.claws}" stroke-width="2" fill="none" stroke-linecap="round"/>
+                    <ellipse cx="${clawR.cx}" cy="${clawR.cy}" rx="12" ry="16" fill="${config.colors.claws}" stroke="${darkenColor(config.colors.claws, 15)}" stroke-width="0.8"/>
+                    <path d="M ${clawR.cx-6} ${clawR.cy-7} L ${clawR.cx+6} ${clawR.cy+7} M ${clawR.cx-6} ${clawR.cy+7} L ${clawR.cx+6} ${clawR.cy-7}" stroke="#4a4038" stroke-width="1.5"/>
+                    <circle cx="${eyeData.l.cx}" cy="${eyeData.l.cy}" r="${eyeData.l.r}" fill="${config.colors.eyes}" stroke="#4a4a4a" stroke-width="0.5"/>
+                    ${eyeData.l.show ? `<circle cx="${eyeData.l.cx+2}" cy="${eyeData.l.cy-2}" r="${eyeData.pup.r}" fill="#4a4a4a"/>` : ''}
+                    <circle cx="${eyeData.r.cx}" cy="${eyeData.r.cy}" r="${eyeData.r.r}" fill="${config.colors.eyes}" stroke="#4a4a4a" stroke-width="0.5"/>
+                    ${eyeData.r.show ? `<circle cx="${eyeData.r.cx+2}" cy="${eyeData.r.cy-2}" r="${eyeData.pup.r}" fill="#4a4a4a"/>` : ''}
+                </g>
+            </svg>
+        `;
+    }
+
+    function startDrag(e, being) {
+        e.preventDefault();
+        e.stopPropagation();
+        cosmosState.draggedBeing = being;
+        being.el.style.transition = 'none';
+        being.el.style.cursor = 'grabbing';
+        being.dragOffset = {
+            x: e.clientX - being.el.getBoundingClientRect().left,
+            y: e.clientY - being.el.getBoundingClientRect().top
+        };
+    }
+
+    function onDrag(e) {
+        if (!cosmosState.draggedBeing) return;
+        const being = cosmosState.draggedBeing;
+        const container = document.getElementById('cosmos-container');
+        if (!container) return;
+        const rect = container.getBoundingClientRect();
+        
+        being.x = e.clientX - rect.left - being.dragOffset.x;
+        being.y = e.clientY - rect.top - being.dragOffset.y;
+    }
+
+    function endDrag() {
+        if (cosmosState.draggedBeing) {
+            cosmosState.draggedBeing.el.style.transition = 'transform 0.1s ease-out';
+            cosmosState.draggedBeing.el.style.cursor = 'grab';
+            cosmosState.draggedBeing = null;
+        }
+    }
+
+    function animateCosmos(ctx, canvas) {
+        if (!ctx || !canvas) return;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const time = Date.now() * 0.001;
+
+        cosmosState.beings.forEach((being, i) => {
+            // 漂浮动画
+            if (being !== cosmosState.draggedBeing) {
+                const floatY = Math.sin(time + being.floatOffset) * 3;
+                const floatX = Math.cos(time * 0.6 + being.floatOffset) * 2;
+                
+                being.x += being.vx + floatX * 0.05;
+                being.y += being.vy + floatY * 0.05;
+
+                // 软边界反弹
+                if (being.x < 20) { being.x = 20; being.vx = Math.abs(being.vx); }
+                if (being.x > canvas.width - being.size - 20) { being.x = canvas.width - being.size - 20; being.vx = -Math.abs(being.vx); }
+                if (being.y < 60) { being.y = 60; being.vy = Math.abs(being.vy); }
+                if (being.y > canvas.height - being.size - 20) { being.y = canvas.height - being.size - 20; being.vy = -Math.abs(being.vy); }
+            }
+
+            // 更新位置
+            being.el.style.transform = `translate3d(${being.x}px, ${being.y}px, 0)`;
+
+            // 绘制连接线
+            cosmosState.beings.forEach((other, j) => {
+                if (i >= j) return;
+                const dx = (being.x + being.size/2) - (other.x + other.size/2);
+                const dy = (being.y + being.size/2) - (other.y + other.size/2);
+                const dist = Math.sqrt(dx*dx + dy*dy);
+
+                if (dist < 120) {
+                    ctx.beginPath();
+                    ctx.moveTo(being.x + being.size/2, being.y + being.size/2);
+                    ctx.lineTo(other.x + other.size/2, other.y + other.size/2);
+                    ctx.strokeStyle = `rgba(100, 100, 100, ${0.15 * (1 - dist/120)})`;
+                    ctx.lineWidth = 0.5;
+                    ctx.stroke();
+                }
+            });
+        });
+
+        cosmosState.animationFrame = requestAnimationFrame(() => animateCosmos(ctx, canvas));
+    }
+
+    // 初始化预览
+    updatePreview();
+</script>
+
+
+</body></html>
