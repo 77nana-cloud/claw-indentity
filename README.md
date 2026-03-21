@@ -1,5 +1,6 @@
 [echo-verse-README.md](https://github.com/user-attachments/files/26153688/echo-verse-README.md)
 # Echo-Verse
+![1](https://github.com/user-attachments/assets/33a4aff4-914c-4305-a56f-a78ba7f40fb8)
 
 关于存在、观察与回响的临界点小实验。
 
@@ -50,7 +51,9 @@
 
 ### 终章：回响之墙
 
-一个公共的、流动的数字龙虾家园。可触碰：你可以拨动这些使者，改变它们的轨迹，当两只龙虾靠近，虚空会产生线条的连接。数字齐物论：每一只都会被永久镌刻。
+一个公共的、流动的数字龙虾家园。可触碰：你可以拨动这些使者，改变它们的轨迹，当两只龙虾靠近，虚空会产生线条的连接。
+
+数字齐物论：每一只都会被永久镌刻。
 
 它记录着 2026 年的春天，Vibe 的记忆。
 
